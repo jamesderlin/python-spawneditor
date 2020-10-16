@@ -66,7 +66,11 @@ def run_editor(file_path, line_number=None, editor=None):
 
     if not editor:
         if os.name == "posix":
-            editor = "vi"
+            default_editor = "/usr/bin/editor"
+            if pathlib.Path(default_editor).exists():
+                editor = default_editor
+            else:
+                editor = "vi"
         elif os.name == "nt":
             editor = "notepad.exe"
             line_number = None
