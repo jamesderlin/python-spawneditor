@@ -23,6 +23,7 @@ editor at a specified line in a file.
 import os
 import shlex
 import subprocess
+import typing
 
 
 class AbortError(Exception):
@@ -31,7 +32,8 @@ class AbortError(Exception):
 
     If `cancelled` is True, no error message should be printed.
     """
-    def __init__(self, message=None, cancelled=False, exit_code=1):
+    def __init__(self, message: typing.Optional[str] = None,
+                 cancelled: bool = False, exit_code: int = 1) -> None:
         super().__init__(message or ("Cancelled."
                                      if cancelled
                                      else "Unknown error"))
@@ -40,7 +42,9 @@ class AbortError(Exception):
         self.exit_code = exit_code
 
 
-def run_editor(file_path, line_number=None, editor=None):
+def run_editor(file_path: str, *,
+               line_number: typing.Optional[int] = None,
+               editor: typing.Optional[str] = None) -> None:
     """
     Open the specified file in an editor at the specified line number, if
     provided.
@@ -54,12 +58,11 @@ def run_editor(file_path, line_number=None, editor=None):
 
     Raises an `AbortError` if an editor cannot be determined.
     """
-    options = []
+    options = []  # type: typing.List[str]
     use_posix_style = True
 
     if not editor:
-        editor = (os.environ.get("VISUAL")
-                  or os.environ.get("EDITOR"))
+        editor = os.environ.get("VISUAL") or os.environ.get("EDITOR")
 
     if editor:
         (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
