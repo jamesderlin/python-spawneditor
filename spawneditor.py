@@ -21,6 +21,7 @@ editor at a specified line in a file.
 """
 
 import os
+import pathlib
 import shlex
 import subprocess
 import typing
@@ -61,19 +62,14 @@ def run_editor(file_path: str, *,
     options = []  # type: typing.List[str]
     use_posix_style = True
 
-    if not editor:
-        editor = os.environ.get("VISUAL") or os.environ.get("EDITOR")
+    editor = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR")
 
     if editor:
         (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
 
     if not editor:
         if os.name == "posix":
-            default_editor = "/usr/bin/editor"
-            if pathlib.Path(default_editor).exists():
-                editor = default_editor
-            else:
-                editor = "vi"
+            editor = str(pathlib.Path("/usr/bin/editor").resolve()) or "vi"
         elif os.name == "nt":
             editor = "notepad.exe"
             line_number = None
@@ -83,12 +79,15 @@ def run_editor(file_path: str, *,
                              "Set the EDITOR environment variable.")
 
     if line_number:
-        editor_name = os.path.basename(editor)
-        if editor_name in ("sublime_text", "code"):
+        editor_name = pathlib.Path(os.path.basename(editor)).stem
+        if editor_name in ("sublime_text", "code", "atom"):
             file_path = f"{file_path}:{line_number}"
-        else:
+        elif editor_name in ("vi", "vim", "emacs", "xemacs", "nano", "pico",
+                             "gedit"):
             options.append(f"+{line_number}")
-    if use_posix_style and file_path.startswith("-"):
+        elif editor_name in ("notepad++",):
+            options.append(f"-n{line_number}")
+    if use_posix_style and file_path.startswith("-") and "--" not in options:
         options.append("--")
 
     subprocess.run((editor, *options, file_path), check=True)
