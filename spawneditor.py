@@ -59,7 +59,7 @@ def run_editor(file_path: str, *,
 
     Raises an `AbortError` if an editor cannot be determined.
     """
-    options = []  # type: typing.List[str]
+    options: typing.List[str] = []
     use_posix_style = True
 
     editor = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR")
