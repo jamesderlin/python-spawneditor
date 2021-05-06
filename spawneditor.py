@@ -45,7 +45,8 @@ class AbortError(Exception):
 
 def run_editor(file_path: str, *,
                line_number: typing.Optional[int] = None,
-               editor: typing.Optional[str] = None) -> None:
+               editor: typing.Optional[str] = None,
+               stdin: typing.TextIO) -> None:
     """
     Open the specified file in an editor at the specified line number, if
     provided.
@@ -92,4 +93,4 @@ def run_editor(file_path: str, *,
     if use_posix_style and file_path.startswith("-") and "--" not in options:
         options.append("--")
 
-    subprocess.run((editor, *options, file_path), check=True)
+    subprocess.run((editor, *options, file_path), stdin=stdin, check=True)
