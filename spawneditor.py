@@ -1,6 +1,6 @@
 # spawneditor.py
 #
-# Copyright (C) 2020 James D. Lin <jameslin@cal.berkeley.edu>
+# Copyright (C) 2020-2021 James D. Lin <jameslin@cal.berkeley.edu>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,29 +27,17 @@ import subprocess
 import typing
 
 
-class AbortError(Exception):
-    """
-    A simple exception class to abort program execution.
-
-    If `cancelled` is True, no error message should be printed.
-    """
-    def __init__(self, message: typing.Optional[str] = None,
-                 cancelled: bool = False, exit_code: int = 1) -> None:
-        super().__init__(message or ("Cancelled."
-                                     if cancelled
-                                     else "Unknown error"))
-        assert exit_code != 0
-        self.cancelled = cancelled
-        self.exit_code = exit_code
+class UnsupportedPlatformError(Exception):
+    """An exception class raised for unsupported platforms."""
 
 
-def run_editor(file_path: str, *,
-               line_number: typing.Optional[int] = None,
-               editor: typing.Optional[str] = None,
-               stdin: typing.TextIO) -> None:
+def spawn_editor(file_path: str, *,
+                 line_number: typing.Optional[int] = None,
+                 editor: typing.Optional[str] = None,
+                 stdin: typing.TextIO) -> None:
     """
-    Open the specified file in an editor at the specified line number, if
-    provided.
+    Opens the specified file in an editor.  If a line is specified, tries to
+    open the editor at that line number, if possible.
 
     The launched editor will be chosen from, in order:
 
@@ -58,7 +46,7 @@ def run_editor(file_path: str, *,
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
 
-    Raises an `AbortError` if an editor cannot be determined.
+    Raises an `UnsupportedPlatformError` if an editor cannot be determined.
     """
     options: typing.List[str] = []
     use_posix_style = True
@@ -76,8 +64,9 @@ def run_editor(file_path: str, *,
             line_number = None
             use_posix_style = False
         else:
-            raise AbortError("Unable to determine what text editor to use.  "
-                             "Set the EDITOR environment variable.")
+            raise UnsupportedPlatformError(
+                "Unable to determine what text editor to use.  "
+                "Set the EDITOR environment variable.")
 
     if line_number:
         editor_name = pathlib.Path(os.path.basename(editor)).stem
