@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""TODO"""
+"""
+A Python module that attempts to provide a common interface for opening an
+editor at a specified line in a file.
+"""
 
 import os
 import shlex
@@ -37,23 +40,26 @@ class AbortError(Exception):
         self.exit_code = exit_code
 
 
-def run_editor(file_path, line_number=None):
+def run_editor(file_path, line_number=None, editor=None):
     """
     Open the specified file in an editor at the specified line number, if
     provided.
 
     The launched editor will be chosen from, in order:
 
-    1. Command-line option.
+    1. The explicitly specified editor.
     2. The `VISUAL` environment variable.
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
+
+    Raises an `AbortError` if an editor cannot be determined.
     """
     options = []
     use_posix_style = True
 
-    editor = (os.environ.get("VISUAL")
-              or os.environ.get("EDITOR"))
+    if not editor:
+        editor = (os.environ.get("VISUAL")
+                  or os.environ.get("EDITOR"))
 
     if editor:
         (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
@@ -78,4 +84,4 @@ def run_editor(file_path, line_number=None):
     if use_posix_style and file_path.startswith("-"):
         options.append("--")
 
-    subprocess.run((editor, *options, file_path))
+    subprocess.run((editor, *options, file_path), check=True)
