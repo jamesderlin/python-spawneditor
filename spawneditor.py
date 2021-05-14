@@ -47,7 +47,7 @@ def spawn_editor(file_path: str, *,
     The launched editor will be chosen from, in order:
 
     1. The explicitly specified editor.
-    2. The `VISUAL` environment variable.
+    2. The `VISUAL` environment variable, if `DISPLAY` is available.
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
 
@@ -56,7 +56,9 @@ def spawn_editor(file_path: str, *,
     options: typing.List[str] = []
     use_posix_style = True
 
-    editor = editor or os.environ.get("VISUAL") or os.environ.get("EDITOR")
+    editor = (editor
+              or (os.environ.get("DISPLAY") and os.environ.get("VISUAL"))
+              or os.environ.get("EDITOR"))
 
     if editor:
         (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
