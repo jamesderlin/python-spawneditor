@@ -32,6 +32,37 @@ import subprocess
 import typing
 
 
+posix_style = "+{line_number} \"{file_path}\""
+sublime_text_style = "\"{file_path}:{line_number}\""
+
+editor_syntax_table = {
+    # Visual Studio Code
+    "code": "--goto \"{file_path}:{line_number}\"",
+
+    # Sublime Text
+    "subl": sublime_text_style,
+    "sublime_text": sublime_text_style,
+
+    # Atom
+    "atom": sublime_text_style,
+
+    # TextMate
+    "mate": "--line {line_number} \"{file_path}\"",
+
+    # Notepad++
+    "notepad++": "-n{line_number} \"{file_path}\"",
+
+    # POSIX
+    "vi": posix_style,
+    "vim": posix_style,
+    "emacs": posix_style,
+    "xemacs": posix_style,
+    "nano": posix_style,
+    "pico": posix_style,
+    "gedit": posix_style,
+}
+
+
 class UnsupportedPlatformError(Exception):
     """An exception class raised for unsupported platforms."""
 
@@ -39,7 +70,7 @@ class UnsupportedPlatformError(Exception):
 def spawn_editor(file_path: str, *,
                  line_number: typing.Optional[int] = None,
                  editor: typing.Optional[str] = None,
-                 stdin: typing.TextIO) -> None:
+                 stdin: typing.TextIO = None) -> None:
     """
     Opens the specified file in an editor.  If a line is specified, tries to
     open the editor at that line number, if possible.
@@ -75,18 +106,19 @@ def spawn_editor(file_path: str, *,
                 "Unable to determine what text editor to use.  "
                 "Set the EDITOR environment variable.")
 
+    if use_posix_style and file_path.startswith("-"):
+        # pathlib.Path automatically normalizes, which we do NOT want in this
+        # case.
+        file_path = os.path.join(".", file_path)
+
+    additional_arguments = [file_path]
     if line_number:
         editor_name = pathlib.Path(os.path.basename(editor)).stem
-        if editor_name in ("sublime_text", "subl", "code", "atom"):
-            if editor_name == "code":
-                options.append("--goto")
-            file_path = f"{file_path}:{line_number}"
-        elif editor_name in ("vi", "vim", "emacs", "xemacs", "nano", "pico",
-                             "gedit"):
-            options.append(f"+{line_number}")
-        elif editor_name in ("notepad++",):
-            options.append(f"-n{line_number}")
-    if use_posix_style and file_path.startswith("-") and "--" not in options:
-        options.append("--")
+        syntax_format = editor_syntax_table.get(editor_name)
+        if syntax_format:
+            additional_arguments \
+                = shlex.split(syntax_format.format(file_path=file_path,
+                                                   line_number=line_number))
 
-    subprocess.run((editor, *options, file_path), stdin=stdin, check=True)
+    subprocess.run((editor, *options, *additional_arguments),
+                   stdin=stdin, check=True)
