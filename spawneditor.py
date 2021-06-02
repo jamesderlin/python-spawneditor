@@ -85,14 +85,10 @@ def spawn_editor(file_path: str, *,
     Raises an `UnsupportedPlatformError` if an editor cannot be determined.
     """
     options: typing.List[str] = []
-    use_posix_style = True
 
     editor = (editor
               or (os.environ.get("DISPLAY") and os.environ.get("VISUAL"))
               or os.environ.get("EDITOR"))
-
-    if editor:
-        (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
 
     if not editor:
         if os.name == "posix":
@@ -103,13 +99,19 @@ def spawn_editor(file_path: str, *,
         elif os.name == "nt":
             editor = "notepad.exe"
             line_number = None
-            use_posix_style = False
         else:
             raise UnsupportedPlatformError(
                 "Unable to determine what text editor to use.  "
                 "Set the EDITOR environment variable.")
 
-    if use_posix_style and file_path.startswith("-"):
+    assert editor
+    (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
+
+    if file_path.startswith("-"):
+        # Ensure that files that start with a hyphen aren't treated as options.
+        # The invoked editor might not follow the POSIX practice of using a
+        # special `--` option, so tweaking the file path is more universal.
+        #
         # pathlib.Path automatically normalizes, which we do NOT want in this
         # case.
         file_path = os.path.join(".", file_path)
