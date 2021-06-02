@@ -96,7 +96,10 @@ def spawn_editor(file_path: str, *,
 
     if not editor:
         if os.name == "posix":
-            editor = str(pathlib.Path("/usr/bin/editor").resolve()) or "vi"
+            default_editor = pathlib.Path("/usr/bin/editor")
+            editor = (str(default_editor.resolve())
+                      if default_editor.exists()
+                      else "vi")
         elif os.name == "nt":
             editor = "notepad.exe"
             line_number = None
@@ -113,7 +116,7 @@ def spawn_editor(file_path: str, *,
 
     additional_arguments = [file_path]
     if line_number:
-        editor_name = pathlib.Path(os.path.basename(editor)).stem
+        editor_name = pathlib.Path(editor).stem
         syntax_format = editor_syntax_table.get(editor_name)
         if syntax_format:
             additional_arguments \
