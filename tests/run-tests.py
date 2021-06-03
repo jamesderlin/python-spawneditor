@@ -37,10 +37,12 @@ def expect_spawn_editor(file_path: str,
          unittest.mock.patch("os.name", os_name), \
          unittest.mock.patch("pathlib.Path", FakePosixPath), \
          unittest.mock.patch("subprocess.run") as mock_run:
-        spawneditor.spawn_editor(file_path, line_number=line_number,
+        spawneditor.spawn_editor(file_path,
+                                 line_number=line_number,
                                  editor=editor)
         mock_run.assert_called_once_with(expected_command,
-                                         stdin=None, check=True)
+                                         stdin=None,
+                                         check=True)
 
 
 # pylint: disable=no-self-use
@@ -50,9 +52,7 @@ class TestSpawnEditor(unittest.TestCase):
         """Tests basic usage without a line number."""
         editor = "vi"
         file_path = "some_file.txt"
-        expect_spawn_editor(file_path,
-                            None,
-                            {"EDITOR": editor},
+        expect_spawn_editor(file_path, None, {"EDITOR": editor},
                             (editor, file_path))
 
     def test_basic_with_line(self) -> None:
@@ -60,9 +60,7 @@ class TestSpawnEditor(unittest.TestCase):
         editor = "vi"
         file_path = "some_file.txt"
         line_number = 42
-        expect_spawn_editor(file_path,
-                            line_number,
-                            {"EDITOR": editor},
+        expect_spawn_editor(file_path, line_number, {"EDITOR": editor},
                             (editor, f"+{line_number}", file_path))
 
     def test_unrecognized_editor_with_line(self) -> None:
@@ -70,9 +68,7 @@ class TestSpawnEditor(unittest.TestCase):
         editor = "some_unrecognized_editor"
         file_path = "some_file.txt"
         line_number = 42
-        expect_spawn_editor(file_path,
-                            line_number,
-                            {"EDITOR": editor},
+        expect_spawn_editor(file_path, line_number, {"EDITOR": editor},
                             (editor, file_path))
 
     def test_arguments(self) -> None:
@@ -80,17 +76,14 @@ class TestSpawnEditor(unittest.TestCase):
         editor = "/some/path with spaces/vi"
         file_path = "some_file.txt"
         line_number: typing.Optional[int] = None
-        expect_spawn_editor(file_path,
-                            line_number,
+        expect_spawn_editor(file_path, line_number,
                             {"EDITOR": f"\"{editor}\" --one -2 three"},
                             (editor, "--one", "-2", "three", file_path))
 
         line_number = 42
-        expect_spawn_editor(file_path,
-                            line_number,
-                            {"EDITOR": f"\"{editor}\" --one -2 three"},
-                            (editor, "--one", "-2", "three",
-                             f"+{line_number}", file_path))
+        expect_spawn_editor(
+            file_path, line_number, {"EDITOR": f"\"{editor}\" --one -2 three"},
+            (editor, "--one", "-2", "three", f"+{line_number}", file_path))
 
     def test_hyphen_prefix(self) -> None:
         """
@@ -100,15 +93,11 @@ class TestSpawnEditor(unittest.TestCase):
         editor = "vi"
         file_path = "-some_file.txt"
         line_number: typing.Optional[int] = None
-        expect_spawn_editor(file_path,
-                            line_number,
-                            {"EDITOR": editor},
+        expect_spawn_editor(file_path, line_number, {"EDITOR": editor},
                             (editor, f"./{file_path}"))
 
         line_number = 42
-        expect_spawn_editor(file_path,
-                            line_number,
-                            {"EDITOR": editor},
+        expect_spawn_editor(file_path, line_number, {"EDITOR": editor},
                             (editor, f"+{line_number}", f"./{file_path}"))
 
     def test_editor_identification(self) -> None:
@@ -119,8 +108,7 @@ class TestSpawnEditor(unittest.TestCase):
         editor = "C:/Program Files/Sublime Text/subl.exe"
         file_path = "some_file.txt"
         line_number = 42
-        expect_spawn_editor(file_path,
-                            line_number,
+        expect_spawn_editor(file_path, line_number,
                             {"EDITOR": f"\"{editor}\" --wait"},
                             (editor, "--wait", f"{file_path}:{line_number}"))
 
@@ -133,33 +121,24 @@ class TestSpawnEditor(unittest.TestCase):
         explicit_editor = "explicit_editor"
 
         fake_environment: typing.Dict[str, str] = {}
-        expect_spawn_editor(file_path,
-                            line_number,
-                            fake_environment,
+        expect_spawn_editor(file_path, line_number, fake_environment,
                             ("vi", f"+{line_number}", file_path))
 
         fake_environment["EDITOR"] = editor
-        expect_spawn_editor(file_path,
-                            line_number,
-                            fake_environment,
+        expect_spawn_editor(file_path, line_number, fake_environment,
                             ("some_editor", file_path))
 
         fake_environment["VISUAL"] = visual
-        expect_spawn_editor(file_path,
-                            line_number,
-                            fake_environment,
+        expect_spawn_editor(file_path, line_number, fake_environment,
                             (editor, file_path))
 
         fake_environment["DISPLAY"] = ":0.0"
-        expect_spawn_editor(file_path,
-                            line_number,
-                            fake_environment,
+        expect_spawn_editor(file_path, line_number, fake_environment,
                             (visual, file_path))
 
         expect_spawn_editor(file_path,
                             line_number,
-                            fake_environment,
-                            (explicit_editor, file_path),
+                            fake_environment, (explicit_editor, file_path),
                             editor=explicit_editor)
 
 

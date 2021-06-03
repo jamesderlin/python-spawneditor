@@ -31,10 +31,10 @@ import shlex
 import subprocess
 import typing
 
-
 posix_style = "+{line_number} \"{file_path}\""
 sublime_text_style = "\"{file_path}:{line_number}\""
 
+# yapf: disable  # See <https://github.com/google/yapf/issues/928>
 editor_syntax_table = {
     # Visual Studio Code
     "code": "--goto \"{file_path}:{line_number}\"",
@@ -61,13 +61,15 @@ editor_syntax_table = {
     "pico": posix_style,
     "gedit": posix_style,
 }
+# yapf: enable
 
 
 class UnsupportedPlatformError(Exception):
     """An exception class raised for unsupported platforms."""
 
 
-def spawn_editor(file_path: str, *,
+def spawn_editor(file_path: str,
+                 *,
                  line_number: typing.Optional[int] = None,
                  editor: typing.Optional[str] = None,
                  stdin: typing.TextIO = None) -> None:
@@ -94,8 +96,7 @@ def spawn_editor(file_path: str, *,
         if os.name == "posix":
             default_editor = pathlib.Path("/usr/bin/editor")
             editor = (str(default_editor.resolve())
-                      if default_editor.exists()
-                      else "vi")
+                      if default_editor.exists() else "vi")
         elif os.name == "nt":
             editor = "notepad.exe"
             line_number = None
@@ -126,4 +127,5 @@ def spawn_editor(file_path: str, *,
                                                    line_number=line_number))
 
     subprocess.run((editor, *options, *additional_arguments),
-                   stdin=stdin, check=True)
+                   stdin=stdin,
+                   check=True)
