@@ -145,12 +145,17 @@ def edit_temporary(
         temporary_prefix: typing.Optional[str] = None,
         line_number: typing.Optional[int] = None,
         editor: typing.Optional[str] = None,
-        stdin: typing.Optional[typing.TextIO] = None) -> typing.List[str]:
+        stdin: typing.Optional[typing.TextIO] = None) -> typing.Iterator[str]:
     """
     Calls `edit_file` on a temporary file with the specified contents.
 
-    On success, returns the edited contents of the temporary file as a list of
-    lines.
+    `content_lines` specifies the initial contents of the temporary file.  Each
+    element will be written to a separate line, so elements should not include
+    trailing newlines (unless extra blank lines are desired).
+
+    On success, returns an iterator to the lines of the temporary file
+    (including any initial content).  For compatibility with file-like objects,
+    the iterated lines will include trailing newlines.
 
     `temporary_prefix` specifies the desired filename prefix for the temporary
     file.
@@ -171,6 +176,6 @@ def edit_temporary(
                   stdin=stdin)
 
         with open(file.name, "r", encoding="utf8") as f:
-            return list(f)
+            yield from f
     finally:
         os.remove(file.name)
