@@ -29,6 +29,7 @@ import os
 import pathlib
 import shlex
 import subprocess
+import tempfile
 import typing
 
 posix_style = "+{line_number} \"{file_path}\""
@@ -72,7 +73,7 @@ def edit_file(file_path: str,
               *,
               line_number: typing.Optional[int] = None,
               editor: typing.Optional[str] = None,
-              stdin: typing.TextIO = None) -> None:
+              stdin: typing.Optional[typing.TextIO] = None) -> None:
     """
     Opens the specified file in an editor.  If a line is specified, tries to
     open the editor at that line number, if possible.
@@ -84,8 +85,8 @@ def edit_file(file_path: str,
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
 
-    `stdin` may be specified to override a redirected standard input stream with
-    a TTY.
+    `stdin` may be specified to override a redirected standard input stre
+    with a TTY.
 
     Raises an `UnsupportedPlatformError` if an editor cannot be determined.
 
@@ -131,6 +132,45 @@ def edit_file(file_path: str,
                 = shlex.split(syntax_format.format(file_path=file_path,
                                                    line_number=line_number))
 
-    subprocess.run((editor, *options, *additional_arguments),
+    subprocess.run((editor,
+                    *options,
+                    *additional_arguments),
                    stdin=stdin,
                    check=True)
+
+
+def edit_temporary(
+        content_lines: typing.Optional[typing.Iterable[str]] = None,
+        *,
+        temporary_prefix: typing.Optional[str] = None,
+        line_number: typing.Optional[int] = None,
+        editor: typing.Optional[str] = None,
+        stdin: typing.Optional[typing.TextIO] = None) -> typing.List[str]:
+    """
+    Calls `edit_file` on a temporary file with the specified contents.
+
+    On success, returns the edited contents of the temporary file as a list of
+    lines.
+
+    `temporary_prefix` specifies the desired filename prefix for the temporary
+    file.
+
+    For all other parameters, see `edit_file`.
+    """
+    try:
+        with tempfile.NamedTemporaryFile(mode="w",
+                                         prefix=temporary_prefix,
+                                         delete=False,
+                                         encoding="utf8") as file:
+            for line in content_lines or []:
+                print(line, file=file)
+
+        edit_file(file.name,
+                  line_number=line_number,
+                  editor=editor,
+                  stdin=stdin)
+
+        with open(file.name, "r", encoding="utf8") as f:
+            return list(f)
+    finally:
+        os.remove(file.name)

@@ -20,15 +20,39 @@ pip install --user spawneditor
 Alternatively clone the Git repository as a Git submodule named `spawneditor`.
 
 
-## Usage
+## Examples
 
-Example:
 ```python
 import spawneditor
 
+# Open an existing file in the default editor.
+spawneditor.edit_file("path/to/file.txt")
+
+# A line number may be specified.
 spawneditor.edit_file("path/to/file.txt", line_number=123)
+
+# Edits a blank temporary file.
+edited_lines = spawneditor.edit_temporary()  
+
+# Edits a temporary file with specified content.  Unlike `edit_file`,
+# `edit_temporary` returns the contents of the edited file.
+instructions = [
+    "Instructions:",
+    "Enter some text below the line.",
+    "----",
+]
+new_contents = spawneditor.edit_temporary(instructions,
+                                          line_number=(len(instructions) + 1))
+
+# ... or, if you prefer a single string with newlines:
+new_contents = spawneditor.edit_temporary(
+    sss["Instructions:\nEnter some text below the line.\n----"],
+    line_number=4,
+)
+
+for line in new_contents:
+    print(line, end="")
 ```
-`line_number` is optional.
 
 
 ## FAQ
