@@ -68,11 +68,11 @@ class UnsupportedPlatformError(Exception):
     """An exception class raised for unsupported platforms."""
 
 
-def spawn_editor(file_path: str,
-                 *,
-                 line_number: typing.Optional[int] = None,
-                 editor: typing.Optional[str] = None,
-                 stdin: typing.TextIO = None) -> None:
+def edit_file(file_path: str,
+              *,
+              line_number: typing.Optional[int] = None,
+              editor: typing.Optional[str] = None,
+              stdin: typing.TextIO = None) -> None:
     """
     Opens the specified file in an editor.  If a line is specified, tries to
     open the editor at that line number, if possible.
@@ -84,7 +84,12 @@ def spawn_editor(file_path: str,
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
 
+    `stdin` may be specified to override a redirected standard input stream with
+    a TTY.
+
     Raises an `UnsupportedPlatformError` if an editor cannot be determined.
+
+    Raises `subprocess.CalledProcessError` if opening the editor failed.
     """
     options: typing.List[str] = []
 
