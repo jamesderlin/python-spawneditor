@@ -78,6 +78,8 @@ def edit_file(file_path: str,
     Opens the specified file in an editor.  If a line is specified, tries to
     open the editor at that line number, if possible.
 
+    Line numbers start from 1.
+
     The launched editor will be chosen from, in order:
 
     1. The explicitly specified editor.
@@ -132,9 +134,7 @@ def edit_file(file_path: str,
                 = shlex.split(syntax_format.format(file_path=file_path,
                                                    line_number=line_number))
 
-    subprocess.run((editor,
-                    *options,
-                    *additional_arguments),
+    subprocess.run((editor, *options, *additional_arguments),
                    stdin=stdin,
                    check=True)
 
@@ -150,8 +150,8 @@ def edit_temporary(
     Calls `edit_file` on a temporary file with the specified contents.
 
     `content_lines` specifies the initial contents of the temporary file.  Each
-    element will be written to a separate line, so elements should not include
-    trailing newlines (unless extra blank lines are desired).
+    element will be written to a separate line, so elements should *not*
+    include trailing newlines (unless extra blank lines are desired).
 
     On success, returns a list of the lines of the temporary file (including
     any initial content).  For compatibility with file-like objects, the lines
