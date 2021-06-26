@@ -84,13 +84,26 @@ specify how to invoke arbitrary editors.  I currently prefer not to because:
 * It adds code complexity and incurs a penalty for what is likely to be a rare
   situation.
 * It reduces incentives to make `spawneditor` support other editors directly.
-* The fallback behavior of opening the file in the default editor (just not at
-  the specified line number) should be acceptable.
+* The fallback behavior still should open the file in the default editor, just
+  not at the specified line number.  I think that's pretty acceptable.
 
 One pathological situation where an override would be necessary is if an editor
 uses the same executable name as one of the recognized editors *and* uses a
 different command-line syntax for specifying the line number.  However, that
 also should be a very rare situation.
+
+One compelling reason might be to allow people to set their default editor to a
+wrapper script that invokes their actual editor.  I'm sympathetic to that, but
+in the meantime, the wrapper script could be given the same name as the actual
+editor.
+
+
+### Q: Why does `VISUAL` depend on `DISPLAY`?
+
+Technically `VISUAL` should refer to a full-screen editor, not necessarily a
+graphical editor.  In practice, however, I think that the graphical vs.
+text-mode distinction is far more relevant and important than the distinction
+between full-screen and line-based editors.
 
 
 ### Q: Why does `spawneditor.edit_file` immediately return when spawning a multi-document editor (e.g. Visual Studio Code, Sublime Text)?
