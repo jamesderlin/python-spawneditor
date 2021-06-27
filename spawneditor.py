@@ -69,7 +69,7 @@ class UnsupportedPlatformError(Exception):
     """An exception class raised for unsupported platforms."""
 
 
-def edit_file(file_path: str,
+def edit_file(file_path: typing.Optional[str],
               *,
               line_number: typing.Optional[int] = None,
               editor: typing.Optional[str] = None,
@@ -95,6 +95,7 @@ def edit_file(file_path: str,
     Raises `subprocess.CalledProcessError` if opening the editor failed.
     """
     options: typing.List[str] = []
+    additional_arguments: typing.List[str] = []
 
     editor = (editor
               or (os.environ.get("DISPLAY") and os.environ.get("VISUAL"))
@@ -116,23 +117,25 @@ def edit_file(file_path: str,
     assert editor
     (editor, *options) = shlex.split(editor, posix=(os.name == "posix"))
 
-    if file_path.startswith("-"):
-        # Ensure that files that start with a hyphen aren't treated as options.
-        # The invoked editor might not follow the POSIX practice of using a
-        # special `--` option, so tweaking the file path is more universal.
-        #
-        # pathlib.Path automatically normalizes, which we do NOT want in this
-        # case.
-        file_path = os.path.join(".", file_path)
+    if file_path:
+        if file_path.startswith("-"):
+            # Ensure that files that start with a hyphen aren't treated as
+            # options.  The invoked editor might not follow the POSIX practice
+            # of using a special `--` option, so tweaking the file path is more
+            # universal.
+            #
+            # Use `os.path.join` instead of `pathlib.Path` because the latter
+            # automatically normalizes, which we do NOT want in this case.
+            file_path = os.path.join(".", file_path)
 
-    additional_arguments = [file_path]
-    if line_number:
-        editor_name = pathlib.Path(editor).stem
-        syntax_format = editor_syntax_table.get(editor_name)
-        if syntax_format:
-            additional_arguments \
-                = shlex.split(syntax_format.format(file_path=file_path,
-                                                   line_number=line_number))
+        additional_arguments = [file_path]
+        if line_number:
+            editor_name = pathlib.Path(editor).stem
+            syntax_format = editor_syntax_table.get(editor_name)
+            if syntax_format:
+                additional_arguments = shlex.split(
+                    syntax_format.format(file_path=file_path,
+                                         line_number=line_number))
 
     subprocess.run((editor, *options, *additional_arguments),
                    stdin=stdin,
