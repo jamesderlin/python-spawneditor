@@ -17,7 +17,7 @@ class FakePosixPath(pathlib.PurePosixPath):
     """
     Fake version of `pathlib.PosixPath` that can run on non-POSIX systems.
     """
-    def exists(self):
+    def exists(self) -> bool:
         """
         Implementation of `pathlib.PosixPath.exists` that ignores the existence
         of `/usr/bin/editor`.
@@ -31,7 +31,7 @@ def expect_edit_file(file_path: str,
                      environment: typing.Dict[str, str],
                      expected_command: typing.Iterable[str],
                      editor: typing.Optional[str] = None,
-                     os_name="posix") -> None:
+                     os_name: str = "posix") -> None:
     """
     Verifies the behavior of `spawneditor.edit_file`, setting up necessary
     mocks.
@@ -51,7 +51,7 @@ def expect_edit_file(file_path: str,
 def expect_edit_temporary(
         test_case: unittest.TestCase,
         *,
-        content_lines: typing.Iterable[str] = None,
+        content_lines: typing.Optional[typing.Iterable[str]] = None,
         temporary_prefix: typing.Optional[str] = None,
         line_number: typing.Optional[int] = None,
         editor: typing.Optional[str] = None,
@@ -75,7 +75,8 @@ def expect_edit_temporary(
         "Vestibulum efficitur eu.",  # Newline intentionally omitted.
     ]
 
-    def temp_file_wrapper(*args, **kwargs) -> typing.IO[typing.Any]:
+    def temp_file_wrapper(*args: typing.Any,
+                          **kwargs: typing.Any) -> typing.IO[typing.Any]:
         """
         A wrapper around `tempfile.NamedTemporaryFile` that captures the path
         to the temporary file.
