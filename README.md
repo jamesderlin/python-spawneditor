@@ -111,10 +111,10 @@ between full-screen and line-based editors.
 Multi-document editors are typically also *single-instance*: when the editor is
 invoked, a new process will be spawned, but that process then will forward the
 request to an existing, primary process.  The new, secondary process then will
-immediately exit and cause `spawneditor.edit_file` to return.  Such editors typically
-provide a command-line option (e.g. `--wait` for Visual Studio Code and Sublime
-Text) to keep the secondary process alive until the file is closed by the
-primary process.  Consult the documentation to your editor.
+immediately exit and cause `spawneditor.edit_file` to return.  Such editors
+typically provide a command-line option (e.g. `--wait` for Visual Studio Code
+and Sublime Text) to keep the secondary process alive until the file is closed
+by the primary process.  Consult the documentation to your editor.
 
 
 ### Q: Aren't there already Python packages that do this?

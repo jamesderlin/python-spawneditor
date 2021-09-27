@@ -5,51 +5,23 @@ Executable wrapper around spawneditor.py.  Runs the default editor on a
 specified file at a specified line number.
 """
 
-import getopt
+import argparse
 import os
 import sys
 import typing
 
 import spawneditor
 
-_usage_text = """
-Options:
-    --line=LINE
-"""
-
-
-def usage(*, full: bool = False, file: typing.TextIO = sys.stdout) -> None:
-    """Prints usage information."""
-    print(f"Usage: {__name__} [OPTIONS] FILE\n"
-          f"       {__name__} --help\n",
-          file=file,
-          end="")
-    if full:
-        print(f"\n"
-              f"{__doc__.strip()}\n"
-              f"\n"
-              f"{_usage_text.strip()}\n",
-              file=file,
-              end="")
-
-
 def main(argv: typing.List[str]) -> int:
-    try:
-        (opts, args) = getopt.getopt(argv[1:], "h", ["help", "line="])
-    except getopt.GetoptError as e:
-        print(str(e), file=sys.stderr)
-        usage(file=sys.stderr)
-        return 1
+    ap = argparse.ArgumentParser(description=__doc__.strip(), add_help=False)
+    ap.add_argument("-h", "--help", action="help",
+                    help="Show this help message and exit.")
+    ap.add_argument("--line", metavar="LINE", type=int)
+    ap.add_argument("file", metavar="FILE", nargs="?")
 
-    line_number: typing.Optional[int] = None
-    for (o, a) in opts:
-        if o in ("-h", "--help"):
-            usage(full=True)
-            return 0
-        elif o == "--line":
-            line_number = int(a)
+    args = ap.parse_args(argv[1:])
 
-    spawneditor.edit_file(args[0] if args else None, line_number=line_number)
+    spawneditor.edit_file(args.file, line_number=args.line)
 
     return 0
 
