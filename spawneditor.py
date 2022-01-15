@@ -87,7 +87,7 @@ def edit_file(file_path: typing.Optional[str],
     3. The `EDITOR` environment variable.
     4. Hard-coded paths to common editors.
 
-    `stdin` may be specified to override a redirected standard input stre
+    `stdin` may be specified to override a redirected standard input stream
     with a TTY.
 
     Raises an `UnsupportedPlatformError` if an editor cannot be determined.

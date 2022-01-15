@@ -12,6 +12,7 @@ import typing
 
 import spawneditor
 
+
 def main(argv: typing.List[str]) -> int:
     ap = argparse.ArgumentParser(description=__doc__.strip(), add_help=False)
     ap.add_argument("-h", "--help", action="help",
