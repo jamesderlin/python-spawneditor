@@ -148,6 +148,7 @@ def edit_temporary(
         temporary_prefix: typing.Optional[str] = None,
         line_number: typing.Optional[int] = None,
         editor: typing.Optional[str] = None,
+        encoding: typing.Optional[str] = None,
         stdin: typing.Optional[typing.TextIO] = None) -> typing.List[str]:
     """
     Calls `edit_file` on a temporary file with the specified contents.
@@ -169,7 +170,7 @@ def edit_temporary(
         with tempfile.NamedTemporaryFile(mode="w",
                                          prefix=temporary_prefix,
                                          delete=False,
-                                         encoding="utf8") as file:
+                                         encoding=encoding) as file:
             for line in content_lines or []:
                 print(line, file=file)
 
@@ -178,7 +179,7 @@ def edit_temporary(
                   editor=editor,
                   stdin=stdin)
 
-        with open(file.name, "r", encoding="utf8") as f:
+        with open(file.name, "r", encoding=encoding) as f:
             return list(f)
     finally:
         os.remove(file.name)
