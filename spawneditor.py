@@ -1,6 +1,6 @@
 # spawneditor.py
 #
-# Copyright (C) 2020-2021 James D. Lin <jamesdlin@berkeley.edu>
+# Copyright (C) 2020-2022 James D. Lin <jamesdlin@berkeley.edu>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -166,6 +166,7 @@ def edit_temporary(
 
     For all other parameters, see `edit_file`.
     """
+    file: typing.Optional[typing.TextIO] = None
     try:
         with tempfile.NamedTemporaryFile(mode="w",
                                          prefix=temporary_prefix,
@@ -182,4 +183,8 @@ def edit_temporary(
         with open(file.name, "r", encoding=encoding) as f:
             return list(f)
     finally:
-        os.remove(file.name)
+        if file:
+            try:
+                os.remove(file.name)
+            except FileNotFoundError:
+                pass

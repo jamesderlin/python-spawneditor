@@ -129,7 +129,7 @@ is room for cross-pollination.
 
 ---
 
-Copyright © 2020-2021 James D. Lin.
+Copyright © 2020-2022 James D. Lin.
 
 [`spawneditor.py`]: https://github.com/jamesderlin/python-spawneditor/blob/master/spawneditor.py
 [`editor`]: https://pypi.org/project/editor/
